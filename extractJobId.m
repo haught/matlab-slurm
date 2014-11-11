@@ -1,11 +1,10 @@
 function jobID = extractJobId(cmdOut)
-% Extracts the job ID from the bsub command output for LSF
+% Extracts the job ID from the sbatch command output for LSF
 
 % Copyright 2010-2011 The MathWorks, Inc.
 
-% The output of bsub will be:
-% Job <327> is submitted to default queue <normal>.
-jobNumberStr = regexp(cmdOut, 'Job <[0-9]*>', 'once', 'match');
-jobID = sscanf(jobNumberStr, 'Job <%d>');
-dctSchedulerMessage(0, '%s: Job ID %d was extracted from bsub output %s.', mfilename, jobID, cmdOut);
-
+% The output of sbatch will be:
+% Submitted batch job 41600.
+jobNumberStr = regexp(cmdOut, 'job [0-9]*', 'once', 'match');
+jobID = sscanf(jobNumberStr, 'job %d');
+dctSchedulerMessage(0, '%s: Job ID %d was extracted from sbatch output %s.', mfilename, jobID, cmdOut);

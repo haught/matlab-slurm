@@ -39,8 +39,8 @@ catch err
     ex = ex.addCause(err);
     throw(ex);
 end
-  
-commandToRun = sprintf('bjobs %s', sprintf('%d ', jobIDs{:}));
+
+commandToRun = sprintf('squeue -j %s -h -o \%T', sprintf('%d ', jobIDs{:}));
 dctSchedulerMessage(4, '%s: Querying cluster for job state using command:\n\t%s', currFilename, commandToRun);
 
 try
@@ -68,17 +68,17 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function state = iExtractJobState(bjobsOut, numJobs)
-% Function to extract the job state from the output of bjobs
+% Function to extract the job state from the output of squeue
 
 % How many PEND, PSUSP, USUSP, SSUSP, WAIT
-numPending = numel(regexp(bjobsOut, 'PEND|PSUSP|USUSP|SSUSP|WAIT'));
+numPending = numel(regexp(bjobsOut, 'PENDING|SUSPENDED|COMPLETING|CONFIGURING|PREEMPTED'));
 % How many RUN strings - UNKWN started running and then comms was lost
 % with the sbatchd process.
-numRunning = numel(regexp(bjobsOut, 'RUN|UNKWN'));
+numRunning = numel(regexp(bjobsOut, 'RUNNING|UNKNOWN'));
 % How many DONE, EXIT, ZOMBI strings
-numFailed = numel(regexp(bjobsOut, 'EXIT|ZOMBI'));
+numFailed = numel(regexp(bjobsOut, 'FAILED|TIMEOUT'));
 % How many DONE
-numFinished = numel(regexp(bjobsOut, 'DONE'));
+numFinished = numel(regexp(bjobsOut, 'COMPLETED|CANCELED|NODE_FAIL|SPECIAL_EXIT'));
 
 % If the number of finished jobs is the same as the number of jobs that we
 % asked about then the entire job has finished.

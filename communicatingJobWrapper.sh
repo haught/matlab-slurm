@@ -1,7 +1,7 @@
 #!/bin/sh
 # This wrapper script is intended to be submitted to LSF to support
 # communicating jobs.
-# 
+#
 # This script uses the following environment variables set by the submit MATLAB code:
 # MDCE_CMR            - the value of ClusterMatlabRoot (may be empty)
 # MDCE_MATLAB_EXE     - the MATLAB executable to use
@@ -9,9 +9,9 @@
 #
 # The following environment variables are forwarded through mpiexec:
 # MDCE_DECODE_FUNCTION     - the decode function to use
-# MDCE_STORAGE_LOCATION    - used by decode function 
-# MDCE_STORAGE_CONSTRUCTOR - used by decode function 
-# MDCE_JOB_LOCATION        - used by decode function 
+# MDCE_STORAGE_LOCATION    - used by decode function
+# MDCE_STORAGE_CONSTRUCTOR - used by decode function
+# MDCE_JOB_LOCATION        - used by decode function
 
 # Copyright 2006-2012 The MathWorks, Inc.
 
@@ -39,25 +39,44 @@ manipulateHosts() {
         then
         echo "Calculating SMPD_HOSTS and MACHINE_ARG"
 
-        # LSB_MCPU_HOSTS is a series of hostnames and numbers, we need to pick
+        # SLURM_JOB_NODELIST is an ranged string of hostnames, we need to pick
         # out just the names for the SMPD_HOSTS argument, and also count the
-        # number of different hosts in use for mpiexec's "-hosts" argument. 
-        isHost=1
+        # number of different tasks per host for mpiexec's "-hosts" argument.
         SMPD_HOSTS=""
-        NUM_PM_HOSTS=0
 
-        # Loop over every entry in LSB_MCPU_HOSTS
-        for x in ${LSB_MCPU_HOSTS}
+        HOSTS=$(scontrol show hostnames ${SLURM_JOB_NODELIST})
+        TASKPN=$(echo ${SLURM_TASKS_PER_NODE} | tr "," "\n")
+
+        i=0
+        for e in ${TASKPN}
           do
-          if [ ${isHost} -eq 1 ]
-              # every other entry is a hostname
-              then
-              SMPD_HOSTS="${SMPD_HOSTS} ${x}"
-              NUM_PM_HOSTS=`expr 1 + ${NUM_PM_HOSTS}`
+          if echo ${e} | grep -q "x" ; then
+            TASK=`echo ${e} | sed 's/\([0-9]\)*(.*)/\1/'`
+            NODE=`echo ${e} | sed 's/.*(x\([0-9]*\))/\1/'`
+            a=0
+            while [ $a -lt ${NODE} ]
+            do
+              NTASK[$i]="${TASK}"
+              a=`expr $a + 1`
+              i=`expr $i + 1`
+            done
+          else
+            NTASK[$i]="${e}"
           fi
-          isHost=`expr 1 - ${isHost}`
+          i=`expr $i + 1`
         done
-        MACHINE_ARG="-hosts ${NUM_PM_HOSTS} ${LSB_MCPU_HOSTS}"
+        i=0
+        for x in ${HOSTS}
+          do
+            SMPD_HOSTS[$i]="${x}"
+            HOSTLIST[$i]="${x} ${NTASK[$i]}"
+            i=`expr $i + 1`
+        done
+
+        SMPD_HOSTS="${SMPD_LAUNCHED_HOSTS[*]}"
+        HOSTLIST="${HOSTLIST[*]}"
+
+        MACHINE_ARG="-hosts ${SLURM_JOB_NUM_NODES} ${HOSTLIST}"
     fi
 }
 
@@ -87,8 +106,8 @@ cleanupAndExit() {
     echo "Stopping SMPD on ${SMPD_LAUNCHED_HOSTS} ..."
     for host in ${SMPD_LAUNCHED_HOSTS}
     do
-        echo ${SSH_COMMAND} $host \"${FULL_SMPD}\" -shutdown -phrase MATLAB -port ${SMPD_PORT}
-        ${SSH_COMMAND} $host \"${FULL_SMPD}\" -shutdown -phrase MATLAB -port ${SMPD_PORT}
+        echo /usr/bin/srun \"${FULL_SMPD}\" -shutdown -phrase MATLAB -port ${SMPD_PORT}
+        /usr/bin/srun \"${FULL_SMPD}\" -shutdown -phrase MATLAB -port ${SMPD_PORT}
     done
     echo "Exiting with code: ${MPIEXEC_CODE}"
     exit ${MPIEXEC_CODE}
@@ -100,8 +119,8 @@ launchSmpds() {
     echo "Starting SMPD on ${SMPD_HOSTS} ..."
     for host in ${SMPD_HOSTS}
       do
-      echo ${SSH_COMMAND} $host \"${FULL_SMPD}\" -s -phrase MATLAB -port ${SMPD_PORT}
-      ${SSH_COMMAND} $host \"${FULL_SMPD}\" -s -phrase MATLAB -port ${SMPD_PORT}
+      echo /usr/bin/srun \"${FULL_SMPD}\" -s -phrase MATLAB -port ${SMPD_PORT}
+      /usr/bin/srun \"${FULL_SMPD}\" -s -phrase MATLAB -port ${SMPD_PORT}
       ssh_return=${?}
       if [ ${ssh_return} -ne 0 ]
           then
@@ -120,7 +139,7 @@ runMpiexec() {
         -l ${MACHINE_ARG} -genvlist \
         MDCE_DECODE_FUNCTION,MDCE_STORAGE_LOCATION,MDCE_STORAGE_CONSTRUCTOR,MDCE_JOB_LOCATION,MDCE_DEBUG,MDCE_LICENSE_NUMBER,MLM_WEB_LICENSE,MLM_WEB_USER_CRED,MLM_WEB_ID \
         \"${MDCE_MATLAB_EXE}\" ${MDCE_MATLAB_ARGS}
-    
+
     # ...and then execute it
     eval \"${FULL_MPIEXEC}\" -phrase MATLAB -port ${SMPD_PORT} \
         -l ${MACHINE_ARG} -genvlist \

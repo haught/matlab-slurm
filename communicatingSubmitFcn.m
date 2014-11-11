@@ -35,7 +35,7 @@ matlabArguments = strtrim(props.MatlabArguments);
 variables = {'MDCE_DECODE_FUNCTION', decodeFunction; ...
     'MDCE_STORAGE_CONSTRUCTOR', props.StorageConstructor; ...
     'MDCE_JOB_LOCATION', props.JobLocation; ...
-    'MDCE_MATLAB_EXE', props.MatlabExecutable; ... 
+    'MDCE_MATLAB_EXE', props.MatlabExecutable; ...
     'MDCE_MATLAB_ARGS', matlabArguments; ...
     'MDCE_DEBUG', 'true'; ...
     'MLM_WEB_LICENSE', props.UseMathworksHostedLicensing; ...
@@ -57,7 +57,7 @@ end
 % Deduce the correct quote to use based on the OS of the current machine
 if ispc
     quote = '"';
-else 
+else
     quote = '''';
 end
 
@@ -79,16 +79,16 @@ jobName = sprintf('Job%d', job.ID);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% CUSTOMIZATION MAY BE REQUIRED %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% You may wish to customize this section to match your cluster, 
-% for example if you wish to limit the number of nodes that 
+% You may wish to customize this section to match your cluster,
+% for example if you wish to limit the number of nodes that
 % can be used for a single job.
-% You may also with to supply additional submission arguments to 
-% the bsub command here.
+% You may also with to supply additional submission arguments to
+% the sbatch command here.
 additionalSubmitArgs = sprintf('-n %d', props.NumberOfTasks);
 dctSchedulerMessage(4, '%s: Requesting %d nodes.', currFilename, props.NumberOfTasks);
 dctSchedulerMessage(5, '%s: Generating command for task %i', currFilename, ii);
 commandToRun = getSubmitString(jobName, quotedLogFile, quotedScriptName, ...
-    additionalSubmitArgs);   
+    additionalSubmitArgs);
 
 
 % Now ask the cluster to run the submission command
@@ -120,5 +120,3 @@ end
 
 % set the job ID on the job cluster data
 cluster.setJobClusterData(job, struct('ClusterJobIDs', {jobIDs}));
-
-

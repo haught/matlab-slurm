@@ -34,14 +34,14 @@ catch err
 end
 
 % Only ask the cluster to delete the job if it is hasn't reached a terminal
-% state.  
+% state.
 erroredJobs = cell(size(jobIDs));
 jobState = job.State;
 if ~(strcmp(jobState, 'finished') || strcmp(jobState, 'failed'))
     % Get the cluster to delete the job
     for ii = 1:length(jobIDs)
         jobID = jobIDs{ii};
-        commandToRun = sprintf('bkill "%d"', jobID);
+        commandToRun = sprintf('scancel "%d"', jobID);
         dctSchedulerMessage(4, '%s: Deleting job on cluster using command:\n\t%s.', currFilename, commandToRun);
         try
             % Make the shelled out call to run the command.
@@ -50,7 +50,7 @@ if ~(strcmp(jobState, 'finished') || strcmp(jobState, 'failed'))
             cmdFailed = true;
             cmdOut = err.message;
         end
-        
+
         if cmdFailed
             % Keep track of all jobs that errored when being deleted.  We'll
             % report these later on.

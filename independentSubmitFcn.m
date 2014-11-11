@@ -35,7 +35,7 @@ matlabArguments = strtrim(props.MatlabArguments);
 variables = {'MDCE_DECODE_FUNCTION', decodeFunction; ...
     'MDCE_STORAGE_CONSTRUCTOR', props.StorageConstructor; ...
     'MDCE_JOB_LOCATION', props.JobLocation; ...
-    'MDCE_MATLAB_EXE', props.MatlabExecutable; ... 
+    'MDCE_MATLAB_EXE', props.MatlabExecutable; ...
     'MDCE_MATLAB_ARGS', matlabArguments; ...
     'MDCE_DEBUG', 'true'; ...
     'MLM_WEB_LICENSE', props.UseMathworksHostedLicensing; ...
@@ -55,7 +55,7 @@ end
 % Deduce the correct quote to use based on the OS of the current machine
 if ispc
     quote = '"';
-else 
+else
     quote = '''';
 end
 
@@ -77,26 +77,26 @@ for ii = 1:numberOfTasks
     taskLocation = props.TaskLocations{ii};
     % Set the environment variable that defines the location of this task
     setenv('MDCE_TASK_LOCATION', taskLocation);
-    
+
     % Choose a file for the output. Please note that currently, JobStorageLocation refers
     % to a directory on disk, but this may change in the future.
     logFile = cluster.getLogLocation(tasks(ii));
     quotedLogFile = sprintf('%s%s%s', quote, logFile, quote);
-    
+
     % Submit one task at a time
     jobName = sprintf('Job%d.%d', job.ID, tasks(ii).ID);
-    
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% CUSTOMIZATION MAY BE REQUIRED %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % You may also with to supply additional submission arguments to 
-    % the bsub command here.
+    % You may also with to supply additional submission arguments to
+    % the sbatch command here.
     additionalSubmitArgs = '';
     dctSchedulerMessage(5, '%s: Generating command for task %i', currFilename, ii);
     commandToRun = getSubmitString(jobName, quotedLogFile, quotedScriptName, ...
-        additionalSubmitArgs);   
-    
-    
+        additionalSubmitArgs);
+
+
     % Now ask the cluster to run the submission command
     dctSchedulerMessage(4, '%s: Submitting job using command:\n\t%s', currFilename, commandToRun);
     try
@@ -110,10 +110,10 @@ for ii = 1:numberOfTasks
         error('parallelexamples:GenericLSF:SubmissionFailed', ...
             'Submit failed with the following message:\n%s', cmdOut);
     end
-    
+
     dctSchedulerMessage(1, '%s: Job output will be written to: %s\nSubmission output: %s\n', currFilename, logFile, cmdOut);
     jobIDs{ii} = extractJobId(cmdOut);
-    
+
     if isempty(jobIDs{ii})
         warning('parallelexamples:GenericLSF:FailedToParseSubmissionOutput', ...
             'Failed to parse the job identifier from the submission output: "%s"', ...
@@ -123,4 +123,3 @@ end
 
 % set the job ID on the job cluster data
 cluster.setJobClusterData(job, struct('ClusterJobIDs', {jobIDs}));
-
