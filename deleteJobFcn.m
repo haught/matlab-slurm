@@ -1,5 +1,5 @@
 function deleteJobFcn(cluster, job)
-%DELETEJOBFCN Deletes a job on LSF
+%DELETEJOBFCN Deletes a job on SLURM
 %
 % Set your cluster's DeleteJobFcn to this function using the following
 % command:
@@ -10,11 +10,11 @@ function deleteJobFcn(cluster, job)
 % Store the current filename for the errors, warnings and dctSchedulerMessages
 currFilename = mfilename;
 if ~isa(cluster, 'parallel.Cluster')
-    error('parallelexamples:GenericLSF:SubmitFcnError', ...
+    error('parallelexamples:GenericSLURM:SubmitFcnError', ...
         'The function %s is for use with clusters created using the parcluster command.', currFilename)
 end
 if ~cluster.HasSharedFilesystem
-    error('parallelexamples:GenericLSF:SubmitFcnError', ...
+    error('parallelexamples:GenericSLURM:SubmitFcnError', ...
         'The submit function %s is for use with shared filesystems.', currFilename)
 end
  % Get the information about the actual cluster used
@@ -27,7 +27,7 @@ end
 try
     jobIDs = data.ClusterJobIDs;
 catch err
-    ex = MException('parallelexamples:GenericLSF:FailedToRetrieveJobID', ...
+    ex = MException('parallelexamples:GenericSLURM:FailedToRetrieveJobID', ...
         'Failed to retrieve clusters''s job IDs from the job cluster data.');
     ex = ex.addCause(err);
     throw(ex);
@@ -64,7 +64,7 @@ end
 % Now warn about those jobs that we failed to delete.
 erroredJobs = erroredJobs(~cellfun(@isempty, erroredJobs));
 if ~isempty(erroredJobs)
-    warning('parallelexamples:GenericLSF:FailedToDeleteJob', ...
+    warning('parallelexamples:GenericSLURM:FailedToDeleteJob', ...
         'Failed to delete the following jobs on the cluster:\n%s', ...
         sprintf('\t%d\n', erroredJobs{:}));
 end

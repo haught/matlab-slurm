@@ -1,5 +1,5 @@
 function jobID = extractJobId(cmdOut)
-% Extracts the job ID from the sbatch command output for LSF
+% Extracts the job ID from the sbatch command output for SLURM
 
 % Copyright 2010-2011 The MathWorks, Inc.
 

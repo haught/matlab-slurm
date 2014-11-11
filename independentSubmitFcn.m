@@ -1,5 +1,5 @@
 function independentSubmitFcn(cluster, job, props)
-%INDEPENDENTSUBMITFCN Submit a MATLAB job to a LSF cluster
+%INDEPENDENTSUBMITFCN Submit a MATLAB job to a SLURM cluster
 %
 % Set your cluster's IndependentSubmitFcn to this function using the following
 % command:
@@ -13,19 +13,19 @@ function independentSubmitFcn(cluster, job, props)
 % Store the current filename for the errors, warnings and dctSchedulerMessages
 currFilename = mfilename;
 if ~isa(cluster, 'parallel.Cluster')
-    error('parallelexamples:GenericLSF:SubmitFcnError', ...
+    error('parallelexamples:GenericSLURM:SubmitFcnError', ...
         'The function %s is for use with clusters created using the parcluster command.', currFilename)
 end
 
 decodeFunction = 'parallel.cluster.generic.independentDecodeFcn';
 
 if ~cluster.HasSharedFilesystem
-    error('parallelexamples:GenericLSF:SubmitFcnError', ...
+    error('parallelexamples:GenericSLURM:SubmitFcnError', ...
         'The submit function %s is for use with shared filesystems.', currFilename)
 end
 
 if ~strcmpi(cluster.OperatingSystem, 'unix')
-    error('parallelexamples:GenericLSF:SubmitFcnError', ...
+    error('parallelexamples:GenericSLURM:SubmitFcnError', ...
         'The submit function %s only supports clusters with unix OS.', currFilename)
 end
 
@@ -107,7 +107,7 @@ for ii = 1:numberOfTasks
         cmdOut = err.message;
     end
     if cmdFailed
-        error('parallelexamples:GenericLSF:SubmissionFailed', ...
+        error('parallelexamples:GenericSLURM:SubmissionFailed', ...
             'Submit failed with the following message:\n%s', cmdOut);
     end
 
@@ -115,7 +115,7 @@ for ii = 1:numberOfTasks
     jobIDs{ii} = extractJobId(cmdOut);
 
     if isempty(jobIDs{ii})
-        warning('parallelexamples:GenericLSF:FailedToParseSubmissionOutput', ...
+        warning('parallelexamples:GenericSLURM:FailedToParseSubmissionOutput', ...
             'Failed to parse the job identifier from the submission output: "%s"', ...
             cmdOut);
     end

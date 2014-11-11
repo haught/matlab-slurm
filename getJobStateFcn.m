@@ -1,5 +1,5 @@
 function state = getJobStateFcn(cluster, job, state)
-%GETJOBSTATEFCN Gets the state of a job from LSF
+%GETJOBSTATEFCN Gets the state of a job from SLURM
 %
 % Set your cluster's GetJobStateFcn to this function using the following
 % command:
@@ -10,11 +10,11 @@ function state = getJobStateFcn(cluster, job, state)
 % Store the current filename for the errors, warnings and dctSchedulerMessages
 currFilename = mfilename;
 if ~isa(cluster, 'parallel.Cluster')
-    error('parallelexamples:GenericLSF:SubmitFcnError', ...
+    error('parallelexamples:GenericSLURM:SubmitFcnError', ...
         'The function %s is for use with clusters created using the parcluster command.', currFilename)
 end
 if ~cluster.HasSharedFilesystem
-    error('parallelexamples:GenericLSF:SubmitFcnError', ...
+    error('parallelexamples:GenericSLURM:SubmitFcnError', ...
         'The submit function %s is for use with shared filesystems.', currFilename)
 end
 
@@ -34,7 +34,7 @@ end
 try
     jobIDs = data.ClusterJobIDs;
 catch err
-    ex = MException('parallelexamples:GenericLSF:FailedToRetrieveJobID', ...
+    ex = MException('parallelexamples:GenericSLURM:FailedToRetrieveJobID', ...
         'Failed to retrieve clusters''s job IDs from the job cluster data.');
     ex = ex.addCause(err);
     throw(ex);
@@ -49,7 +49,7 @@ try
     % Make the shelled out call to run the command.
     [~, cmdOut] = system(commandToRun);
 catch err
-    ex = MException('parallelexamples:GenericLSF:FailedToGetJobState', ...
+    ex = MException('parallelexamples:GenericSLURM:FailedToGetJobState', ...
         'Failed to get job state from cluster.');
     ex.addCause(err);
     throw(ex);

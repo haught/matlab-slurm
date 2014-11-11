@@ -1,5 +1,5 @@
 #!/bin/sh
-# This wrapper script is intended to be submitted to LSF to support
+# This wrapper script is intended to be submitted to SLURM to support
 # communicating jobs.
 #
 # This script uses the following environment variables set by the submit MATLAB code:
@@ -31,8 +31,8 @@ SSH_COMMAND="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 # manipulateHosts carries out the functions of both chooseSmpdHosts and
 # chooseMachineArg - it is convenient to calculate both properties together
-# since they both involve parsing the LSB_MCPU_HOSTS environment variable as set
-# by LSF.
+# since they both involve parsing the SLURM_JOB_NODELIST and
+# SLURM_TASKS_PER_NODE environment variables as set by SLURM.
 manipulateHosts() {
     # Make sure we don't execute the body of this function more than once
     if [ "${SMPD_HOSTS:-UNSET}" = "UNSET" ]
@@ -89,8 +89,8 @@ chooseSmpdHosts() {
 
 # Work out which port to use for SMPD
 chooseSmpdPort() {
-    # Use LSF's LSB_JOBID to calculate the port
-    SMPD_PORT=`expr ${LSB_JOBID} % 10000 + 20000`
+    # Use SLURM's SLURM_JOBID to calculate the port
+    SMPD_PORT=`expr ${SLURM_JOBID} % 10000 + 20000`
 }
 
 # Work out how many processes to launch - set MACHINE_ARG

@@ -1,5 +1,5 @@
 function communicatingSubmitFcn(cluster, job, props)
-%COMMUNICATINGSUBMITFCN Submit a communicating MATLAB job to a LSF cluster
+%COMMUNICATINGSUBMITFCN Submit a communicating MATLAB job to a SLURM cluster
 %
 % Set your cluster's CommunicatingSubmitFcn to this function using the following
 % command:
@@ -13,19 +13,19 @@ function communicatingSubmitFcn(cluster, job, props)
 % Store the current filename for the errors, warnings and dctSchedulerMessages
 currFilename = mfilename;
 if ~isa(cluster, 'parallel.Cluster')
-    error('parallelexamples:GenericLSF:SubmitFcnError', ...
+    error('parallelexamples:GenericSLURM:SubmitFcnError', ...
         'The function %s is for use with clusters created using the parcluster command.', currFilename)
 end
 
 decodeFunction = 'parallel.cluster.generic.communicatingDecodeFcn';
 
 if ~cluster.HasSharedFilesystem
-    error('parallelexamples:GenericLSF:SubmitFcnError', ...
+    error('parallelexamples:GenericSLURM:SubmitFcnError', ...
         'The submit function %s is for use with shared filesystems.', currFilename)
 end
 
 if ~strcmpi(cluster.OperatingSystem, 'unix')
-    error('parallelexamples:GenericLSF:SubmitFcnError', ...
+    error('parallelexamples:GenericSLURM:SubmitFcnError', ...
         'The submit function %s only supports clusters with unix OS.', currFilename)
 end
 
@@ -101,7 +101,7 @@ catch err
     cmdOut = err.message;
 end
 if cmdFailed
-    error('parallelexamples:GenericLSF:SubmissionFailed', ...
+    error('parallelexamples:GenericSLURM:SubmissionFailed', ...
         'Submit failed with the following message:\n%s', cmdOut);
 end
 
@@ -110,7 +110,7 @@ dctSchedulerMessage(1, '%s: Job output will be written to: %s\nSubmission output
 jobIDs = extractJobId(cmdOut);
 % jobIDs must be a cell array
 if isempty(jobIDs)
-    warning('parallelexamples:GenericLSF:FailedToParseSubmissionOutput', ...
+    warning('parallelexamples:GenericSLURM:FailedToParseSubmissionOutput', ...
         'Failed to parse the job identifier from the submission output: "%s"', ...
         cmdOut);
 end
