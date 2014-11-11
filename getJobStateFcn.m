@@ -40,7 +40,7 @@ catch err
     throw(ex);
 end
 
-commandToRun = sprintf('squeue -j %s -h -o \%T', sprintf('%d ', jobIDs{:}));
+commandToRun = sprintf('squeue -j %s -h -o %%T', sprintf('%d ', jobIDs{:}));
 dctSchedulerMessage(4, '%s: Querying cluster for job state using command:\n\t%s', currFilename, commandToRun);
 
 try
