@@ -40,7 +40,7 @@ catch err
     throw(ex);
 end
 
-commandToRun = sprintf('squeue -j %s -h -o %%T', sprintf('%d ', jobIDs{:}));
+commandToRun = sprintf('sacct -j %s.0 -n -P -ostate', sprintf('%d ', jobIDs{:}));
 dctSchedulerMessage(4, '%s: Querying cluster for job state using command:\n\t%s', currFilename, commandToRun);
 
 try
@@ -68,7 +68,7 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function state = iExtractJobState(bjobsOut, numJobs)
-% Function to extract the job state from the output of squeue
+% Function to extract the job state from the output of sacct
 
 % How many PEND, PSUSP, USUSP, SSUSP, WAIT
 numPending = numel(regexp(bjobsOut, 'PENDING|SUSPENDED|COMPLETING|CONFIGURING|PREEMPTED'));
